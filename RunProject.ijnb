@@ -1,0 +1,31 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 5,
+  "metadata": {
+    "language_info": {
+      "name": "java"
+    }
+  },
+  "cells": [
+    {
+      "id": "bb320a08-f844-4cba-975f-c510a3af61f6",
+      "cell_type": "code",
+      "source": ".\\mvnw spring-boot:run\r\n",
+      "metadata": {
+        "language": "java"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "id": "4eb3622f-ba92-489c-879d-1d32744e8b1e",
+      "cell_type": "code",
+      "source": "PROJECT PASSWORD\r\n('1001', 'Alice', '12345', 'ADMIN'),\r\n('1002', 'Bob', '12345', 'USER'),\r\n('1003', 'Charlie', '12345', 'USER');",
+      "metadata": {
+        "language": "java"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}

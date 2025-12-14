@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Absensi Karyawan</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+      }
+      form {
+        margin-bottom: 20px;
+      }
+      input {
+        padding: 5px;
+        margin-right: 10px;
+      }
+      button {
+        padding: 5px 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Absensi Karyawan</h1>
+
+    <form id="absensiForm">
+      <input type="text" id="nip" placeholder="NIP" required />
+      <input type="text" id="nama" placeholder="Nama" required />
+      <button type="submit">Absen</button>
+    </form>
+
+    <table id="absensiTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>NIP</th>
+          <th>Nama</th>
+          <th>Waktu</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      async function loadAbsensi() {
+        const res = await fetch("/api/absensi"); // GET semua data
+        const data = await res.json();
+        const tbody = document.querySelector("#absensiTable tbody");
+        tbody.innerHTML = "";
+        data.forEach((a) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${a.id}</td><td>${a.nip}</td><td>${a.nama}</td><td>${a.waktu}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("generateQR").addEventListener("click", async () => {
+          const nip = document.getElementById("nipQR").value;
+          const nama = document.getElementById("namaQR").value;
+          if (!nip || !nama) return alert("Isi NIP & Nama");
+
+          const res = await fetch(`/api/absensi/qr?nip=${encodeURIComponent(nip)}&nama=${encodeURIComponent(nama)}`);
+          const blob = await res.blob();
+          document.getElementById("qrCode").src = URL.createObjectURL(blob);
+        });
+      });
+
+      document.getElementById("absensiForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nip = document.getElementById("nip").value;
+        const nama = document.getElementById("nama").value;
+
+        // POST data ke server
+        await fetch("/api/absensi", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `nip=${encodeURIComponent(nip)}&nama=${encodeURIComponent(nama)}`,
+        });
+
+        // Refresh tabel
+        loadAbsensi();
+
+        // Reset form
+        e.target.reset();
+      });
+
+      // Load data awal
+      loadAbsensi();
+    </script>
+  </body>
+</html>
