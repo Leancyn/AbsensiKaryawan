@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Panel Absensi</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+      }
+      img {
+        width: 100px;
+      }
+      button {
+        padding: 5px 10px;
+        margin: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Admin Panel Absensi</h2>
+    <table id="absensiTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Foto</th>
+          <th>Lokasi</th>
+          <th>Waktu</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      async function loadAbsensi() {
+        const res = await fetch("/api/absensi/all");
+        const data = await res.json();
+        const tbody = document.querySelector("#absensiTable tbody");
+        tbody.innerHTML = "";
+
+        data.forEach((a) => {
+          const tr = document.createElement("tr");
+
+          const fotoBase64 = a.foto ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...a.foto))}` : "";
+
+          tr.innerHTML = `
+            <td>${a.id}</td>
+            <td>${a.userNama}</td>
+            <td>${fotoBase64 ? `<img src="${fotoBase64}" />` : "Tidak ada"}</td>
+            <td>${a.latitude.toFixed(6)}, ${a.longitude.toFixed(6)}</td>
+            <td>${new Date(a.timestamp).toLocaleString()}</td>
+            <td>${a.status}</td>
+            <td>
+                ${
+                  a.status === "pending"
+                    ? `<button onclick="updateStatus(${a.id}, 'approve')">Approve</button>
+                                            <button onclick="updateStatus(${a.id}, 'reject')">Reject</button>`
+                    : ""
+                }
+            </td>
+        `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function updateStatus(id, action) {
+        const res = await fetch(`/api/absensi/${id}/${action}`, { method: "POST" });
+        if (res.ok) {
+          alert(action === "approve" ? "Disetujui" : "Ditolak");
+          loadAbsensi();
+        } else {
+          alert("Gagal mengubah status");
+        }
+      }
+
+      loadAbsensi();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Absensi Kamera</title>
+  </head>
+  <body>
+    <h2>Absensi Karyawan</h2>
+    <video id="video" width="320" height="240" autoplay></video>
+    <button id="absenBtn">Absen Sekarang</button>
+
+    <script>
+      const video = document.getElementById("video");
+
+      // Minta akses kamera
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => (video.srcObject = stream))
+        .catch((err) => alert("Tidak bisa mengakses kamera: " + err));
+
+      document.getElementById("absenBtn").addEventListener("click", async () => {
+        const userId = sessionStorage.getItem("userId");
+        const userNama = sessionStorage.getItem("userNama");
+
+        if (!userId || !userNama) return alert("Login dulu!");
+
+        // Ambil lokasi
+        if (!navigator.geolocation) return alert("Geolocation tidak didukung browser");
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+
+          // Ambil foto dari video
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          canvas.getContext("2d").drawImage(video, 0, 0);
+          const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg"));
+          const arrayBuffer = await blob.arrayBuffer();
+          const byteArray = new Uint8Array(arrayBuffer);
+
+          try {
+            const res = await fetch(`/api/absensi/checkin?userId=${encodeURIComponent(userId)}&userNama=${encodeURIComponent(userNama)}&latitude=${lat}&longitude=${lon}`, {
+              method: "POST",
+              body: byteArray,
+            });
+            if (!res.ok) throw new Error("Gagal absen");
+            const data = await res.json();
+            alert("Absensi berhasil dikirim. Status: " + data.status);
+          } catch (err) {
+            alert(err.message);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

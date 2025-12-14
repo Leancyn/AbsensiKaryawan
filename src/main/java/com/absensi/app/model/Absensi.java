@@ -1,103 +1,60 @@
 package com.absensi.app.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
 @Entity
+@Table(name = "absensi")
 public class Absensi {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nip;
-    private String nama;
-    private String password;
-    private LocalDateTime waktu;
+    private String userId;
+    private String userNama;
+    private double latitude;
+    private double longitude;
+    private LocalDateTime timestamp;
 
-    private LocalDateTime expiredAt;
-    private String ipAddress;
+    @Lob
+    private byte[] foto; // menyimpan foto dari kamera
 
-    private String token;
-    private boolean used = false;
+    private String status; // "pending", "approved", "rejected"
 
-    // === GETTER & SETTER ===
+    public Absensi() {}
 
-    public Long getId() {
-        return id;
+    public Absensi(String userId, String userNama, double latitude, double longitude, LocalDateTime timestamp, byte[] foto) {
+        this.userId = userId;
+        this.userNama = userNama;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.timestamp = timestamp;
+        this.foto = foto;
+        this.status = "pending";
     }
 
-    public String getNip() {
-        return nip;
-    }
+    // Getter & Setter
+    public Long getId() { return id; }
 
-    public void setNip(String nip) {
-        this.nip = nip;
-    }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
-    public String getNama() {
-        return nama;
-    }
+    public String getUserNama() { return userNama; }
+    public void setUserNama(String userNama) { this.userNama = userNama; }
 
-    public void setNama(String nama) {
-        this.nama = nama;
-    }
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
 
-    public String getPassword() {
-        return password;
-    }
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 
-    public LocalDateTime getWaktu() {
-        return waktu;
-    }
+    public byte[] getFoto() { return foto; }
+    public void setFoto(byte[] foto) { this.foto = foto; }
 
-    public void setWaktu(LocalDateTime waktu) {
-        this.waktu = waktu;
-    }
-
-
-    public LocalDateTime getExpiredAt() {
-        return expiredAt;
-    }
-
-    public void setExpiredAt(LocalDateTime expiredAt) {
-        this.expiredAt = expiredAt;
-    }
-
-    public String getToken() 
-    { 
-        return token; 
-    }
-
-    public void setToken(String token) 
-    { 
-        this.token = token; 
-    }
-
-    public boolean isUsed() 
-    { 
-        return used; 
-    }
-
-    public void setUsed(boolean used) 
-    { 
-        this.used = used; 
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

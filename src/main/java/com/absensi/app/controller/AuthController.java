@@ -23,21 +23,23 @@ public class AuthController {
     public LoginResponse login(@RequestBody LoginRequest req, HttpSession session) {
 
         Karyawan k = karyawanRepository.findByNip(req.getNip());
-        if (k == null) return new LoginResponse(false, "NIP tidak terdaftar");
+        if (k == null) 
+            return new LoginResponse(false, "NIP tidak terdaftar", null, null, null);
+
         if (!k.getPassword().equals(req.getPassword()))
-            return new LoginResponse(false, "Password salah");
+            return new LoginResponse(false, "Password salah", null, null, null);
 
         // Simpan data login ke session
         session.setAttribute("userId", k.getId());
         session.setAttribute("userRole", k.getRole());
         session.setAttribute("userNama", k.getNama());
 
-        return new LoginResponse(true, "Login berhasil: " + k.getNama());
+        return new LoginResponse(true, "Login berhasil", k.getRole(), k.getId(), k.getNama());
     }
 
     @PostMapping("/logout")
     public LoginResponse logout(HttpSession session) {
         session.invalidate();
-        return new LoginResponse(true, "Logout berhasil");
+        return new LoginResponse(true, "Logout berhasil", null, null, null);
     }
 }

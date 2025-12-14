@@ -2,16 +2,15 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <title>Absensi Karyawan</title>
+    <title>Login Absensi</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
-        background: #f0f0f0;
+        font-family: Arial;
         text-align: center;
         padding: 50px;
+        background: #f0f0f0;
       }
-      #loginForm,
-      #dashboard {
+      #loginForm {
         background: white;
         padding: 20px;
         border-radius: 8px;
@@ -27,49 +26,26 @@
         margin-top: 10px;
         cursor: pointer;
       }
-      #qrCode {
-        margin-top: 20px;
-      }
     </style>
   </head>
   <body>
     <div id="loginForm">
-      <h2>Login Karyawan</h2>
+      <h2>Login Absensi</h2>
       <input type="text" id="nip" placeholder="NIP" /><br />
       <input type="password" id="password" placeholder="Password" /><br />
       <button id="loginBtn">Login</button>
       <p id="loginMsg" style="color: red"></p>
     </div>
 
-    <div id="dashboard" style="display: none">
-      <h2>Selamat Datang, <span id="userNama"></span></h2>
-      <button id="generateQR">Generate QR Absensi</button>
-      <button id="logoutBtn">Logout</button>
-      <div>
-        <img id="qrCode" src="" alt="QR Code" width="250" height="250" />
-      </div>
-    </div>
-
     <script>
-      const loginForm = document.getElementById("loginForm");
-      const dashboard = document.getElementById("dashboard");
-      const loginMsg = document.getElementById("loginMsg");
-
-      function setSession(user) {
-        sessionStorage.setItem("userId", user.id);
-        sessionStorage.setItem("userNama", user.nama);
-        sessionStorage.setItem("userRole", user.role);
-      }
-
-      function clearSession() {
-        sessionStorage.clear();
-      }
-
-      // === LOGIN ===
       document.getElementById("loginBtn").addEventListener("click", async () => {
         const nip = document.getElementById("nip").value;
         const password = document.getElementById("password").value;
-        if (!nip || !password) return (loginMsg.innerText = "Isi NIP & Password");
+
+        if (!nip || !password) {
+          document.getElementById("loginMsg").innerText = "Isi NIP & Password";
+          return;
+        }
 
         const res = await fetch("/login", {
           method: "POST",
@@ -78,38 +54,24 @@
         });
 
         const data = await res.json();
+
         if (data.success) {
-          loginForm.style.display = "none";
-          dashboard.style.display = "block";
-          document.getElementById("userNama").innerText = data.message.split(": ")[1];
-          // Simpan session
-          setSession({ id: data.userId || nip, nama: data.message.split(": ")[1], role: data.role || "USER" });
+          // Simpan sessionStorage
+          sessionStorage.setItem("userId", data.userId);
+          sessionStorage.setItem("userNama", data.userNama);
+          sessionStorage.setItem("userRole", data.role);
+
+          // Redirect sesuai role
+          if (data.role === "ADMIN") {
+            window.location.href = "/admin/dashboard"; // halaman admin
+          } else if (data.role === "USER") {
+            window.location.href = "/dashboard"; // halaman karyawan
+          } else {
+            document.getElementById("loginMsg").innerText = "Role tidak dikenali";
+          }
         } else {
-          loginMsg.innerText = data.message;
+          document.getElementById("loginMsg").innerText = data.message;
         }
-      });
-
-      // === LOGOUT ===
-      document.getElementById("logoutBtn").addEventListener("click", async () => {
-        await fetch("/logout", { method: "POST" });
-        clearSession();
-        dashboard.style.display = "none";
-        loginForm.style.display = "block";
-      });
-
-      // === GENERATE QR ===
-      document.getElementById("generateQR").addEventListener("click", async () => {
-        // Ambil data dari sessionStorage
-        const nip = sessionStorage.getItem("userId"); // pastikan userId = nip
-        const nama = sessionStorage.getItem("userNama");
-        if (!nip || !nama) return alert("Tidak ada data user, login dulu!");
-
-        // Fetch QR dari backend
-        const res = await fetch(`/api/absensi/qr?nip=${encodeURIComponent(nip)}&nama=${encodeURIComponent(nama)}`);
-        if (!res.ok) return alert("Gagal generate QR: " + res.status);
-
-        const blob = await res.blob();
-        document.getElementById("qrCode").src = URL.createObjectURL(blob);
       });
     </script>
   </body>
