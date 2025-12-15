@@ -1,0 +1,162 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+h2,
+h3 {
+  text-align: center;
+  color: #34495e;
+}
+
+.user-actions {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.user-actions button {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#cameraBtn {
+  background-color: #2980b9;
+  color: #fff;
+}
+#cameraBtn:hover {
+  background-color: #3498db;
+}
+#logoutBtn {
+  background-color: #e74c3c;
+  color: #fff;
+}
+#logoutBtn:hover {
+  background-color: #c0392b;
+}
+
+.video-container {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+video {
+  border: 3px solid #2980b9;
+  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  height: auto;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.status-label {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.status-label.ready {
+  background-color: #27ae60;
+}
+.status-label.error {
+  background-color: #e74c3c;
+}
+
+#absenBtn {
+  padding: 12px 24px;
+  background-color: #27ae60;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+#absenBtn:hover:not(:disabled) {
+  background-color: #2ecc71;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.loading {
+  display: none;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #2980b9;
+}
+
+.status-message {
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+#historyTable {
+  width: 100%;
+  max-width: 600px;
+  border-collapse: collapse;
+  margin-bottom: 40px;
+}
+
+#historyTable th,
+#historyTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+#historyTable th {
+  background-color: #2980b9;
+  color: #fff;
+}
+
+#historyTable td.approved {
+  color: #27ae60;
+  font-weight: bold;
+}
+#historyTable td.rejected {
+  color: #e74c3c;
+  font-weight: bold;
+}
+#historyTable td.pending {
+  color: #f1c40f;
+  font-weight: bold;
+}
+
+@media (max-width: 480px) {
+  video {
+    max-width: 100%;
+  }
+  .user-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  .user-actions button {
+    width: 100%;
+  }
+  #absenBtn {
+    width: 100%;
+  }
+  #historyTable {
+    font-size: 14px;
+  }
+}

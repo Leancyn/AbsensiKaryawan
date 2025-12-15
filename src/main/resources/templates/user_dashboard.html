@@ -2,55 +2,162 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <title>Absensi Kamera</title>
+    <title>Absensi Karyawan</title>
+    <link rel="stylesheet" href="/css/absensi.css" />
   </head>
   <body>
     <h2>Absensi Karyawan</h2>
-    <video id="video" width="320" height="240" autoplay></video>
-    <button id="absenBtn">Absen Sekarang</button>
+
+    <div class="user-actions">
+      <button id="cameraBtn">Nyalakan Kamera</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+    <div class="video-container">
+      <video id="video" autoplay playsinline></video>
+      <div id="cameraStatus" class="status-label">Kamera mati</div>
+    </div>
+
+    <button id="absenBtn" disabled>Absen Sekarang</button>
+    <div id="message" class="status-message"></div>
+    <div id="loading" class="loading">Mengirim data...</div>
+
+    <h3>Riwayat Absensi</h3>
+    <table id="historyTable">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
     <script>
+      const userId = sessionStorage.getItem("userId");
+      const userNama = sessionStorage.getItem("userNama");
+
+      const cameraBtn = document.getElementById("cameraBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
       const video = document.getElementById("video");
+      const cameraStatus = document.getElementById("cameraStatus");
+      const absenBtn = document.getElementById("absenBtn");
+      const message = document.getElementById("message");
+      const loading = document.getElementById("loading");
+      const historyTable = document.querySelector("#historyTable tbody");
 
-      // Minta akses kamera
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => (video.srcObject = stream))
-        .catch((err) => alert("Tidak bisa mengakses kamera: " + err));
+      let stream = null;
 
-      document.getElementById("absenBtn").addEventListener("click", async () => {
-        const userId = sessionStorage.getItem("userId");
-        const userNama = sessionStorage.getItem("userNama");
+      // Logout
+      logoutBtn.addEventListener("click", () => {
+        sessionStorage.clear();
+        window.location.href = "/";
+      });
 
-        if (!userId || !userNama) return alert("Login dulu!");
+      if (!userId || !userNama) {
+        message.textContent = "❌ Silakan login terlebih dahulu!";
+        cameraBtn.disabled = true;
+        absenBtn.disabled = true;
+      }
 
-        // Ambil lokasi
-        if (!navigator.geolocation) return alert("Geolocation tidak didukung browser");
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
+      // Nyalakan kamera saat tombol ditekan
+      cameraBtn.addEventListener("click", async () => {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          video.srcObject = stream;
+          cameraStatus.textContent = "Kamera aktif";
+          cameraStatus.classList.add("ready");
+          absenBtn.disabled = false;
+        } catch (err) {
+          cameraStatus.textContent = "❌ Tidak bisa mengakses kamera";
+          cameraStatus.classList.add("error");
+          console.error(err);
+        }
+      });
 
-          // Ambil foto dari video
-          const canvas = document.createElement("canvas");
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          canvas.getContext("2d").drawImage(video, 0, 0);
-          const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg"));
-          const arrayBuffer = await blob.arrayBuffer();
-          const byteArray = new Uint8Array(arrayBuffer);
+      // Load riwayat absensi user
+      async function loadHistory() {
+        try {
+          const res = await fetch(`/api/absensi/user/${userId}`);
+          if (!res.ok) throw new Error("Gagal memuat riwayat");
+          const data = await res.json();
+          historyTable.innerHTML = "";
+          data.forEach((a) => {
+            const tr = document.createElement("tr");
+            const statusClass = a.status.toLowerCase();
+            tr.innerHTML = `
+            <td>${new Date(a.timestamp).toLocaleString()}</td>
+            <td class="${statusClass}">${a.status}</td>
+          `;
+            historyTable.appendChild(tr);
+          });
+        } catch (err) {
+          console.error(err);
+        }
+      }
 
-          try {
-            const res = await fetch(`/api/absensi/checkin?userId=${encodeURIComponent(userId)}&userNama=${encodeURIComponent(userNama)}&latitude=${lat}&longitude=${lon}`, {
-              method: "POST",
-              body: byteArray,
-            });
-            if (!res.ok) throw new Error("Gagal absen");
-            const data = await res.json();
-            alert("Absensi berhasil dikirim. Status: " + data.status);
-          } catch (err) {
-            alert(err.message);
+      loadHistory();
+      // Live update riwayat setiap 10 detik
+      setInterval(loadHistory, 10000);
+
+      absenBtn.addEventListener("click", async () => {
+        if (!navigator.geolocation) {
+          message.textContent = "❌ Browser tidak mendukung geolocation";
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+
+            if (!stream) {
+              message.textContent = "❌ Kamera belum aktif!";
+              return;
+            }
+
+            // Ambil foto
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0);
+
+            // Matikan kamera setelah foto
+            stream.getTracks().forEach((track) => track.stop());
+            stream = null;
+            cameraStatus.textContent = "Kamera mati";
+            absenBtn.disabled = true;
+
+            const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg"));
+
+            const formData = new FormData();
+            formData.append("userId", userId);
+            formData.append("userNama", userNama);
+            formData.append("latitude", lat);
+            formData.append("longitude", lon);
+            formData.append("foto", blob, "absensi.jpg");
+
+            loading.style.display = "block";
+
+            try {
+              const res = await fetch("/api/absensi/checkin", {
+                method: "POST",
+                body: formData,
+              });
+              if (!res.ok) throw new Error("Gagal absen");
+              const data = await res.json();
+              message.textContent = "✅ Absensi berhasil dikirim. Status: " + data.status;
+              await loadHistory();
+            } catch (err) {
+              message.textContent = "❌ " + err.message;
+            } finally {
+              loading.style.display = "none";
+            }
+          },
+          (err) => {
+            message.textContent = "❌ Gagal mendapatkan lokasi: " + err.message;
           }
-        });
+        );
       });
     </script>
   </body>

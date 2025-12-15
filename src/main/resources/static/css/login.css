@@ -1,0 +1,92 @@
+/* Warna */
+:root {
+  --primary-color: #007bff; /* Biru Primer */
+  --primary-hover: #0056b3; /* Biru Hover */
+  --background-light: #f4f7f6; /* Latar Belakang Cerah */
+  --card-background: #ffffff; /* Latar Belakang Form */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --error-color: #dc3545; /* Merah Error */
+}
+
+/* --- Global & Layout --- */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: var(--background-light);
+}
+
+/* --- Form Container (Card) --- */
+#loginForm {
+  background: var(--card-background);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px var(--shadow-color);
+  width: 100%;
+  max-width: 350px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+#loginForm:hover {
+  transform: translateY(-5px);
+}
+
+/* --- Heading --- */
+h2 {
+  color: #343a40;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+/* --- Input Fields --- */
+input[type="text"],
+input[type="password"] {
+  width: calc(100% - 20px);
+  padding: 12px 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  box-sizing: border-box; /* Agar padding tidak menambah lebar */
+  transition: border-color 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* --- Button --- */
+#loginBtn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#loginBtn:hover {
+  background-color: var(--primary-hover);
+}
+
+#loginBtn:active {
+  background-color: #004085;
+}
+
+/* --- Message / Error --- */
+#loginMsg {
+  margin-top: 15px;
+  font-size: 14px;
+  color: var(--error-color) !important;
+  font-weight: 500;
+}

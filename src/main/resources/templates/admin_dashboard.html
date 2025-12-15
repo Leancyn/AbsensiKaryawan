@@ -3,28 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <title>Admin Panel Absensi</title>
-    <style>
-      table {
-        border-collapse: collapse;
-        width: 100%;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: center;
-      }
-      img {
-        width: 100px;
-      }
-      button {
-        padding: 5px 10px;
-        margin: 2px;
-      }
-    </style>
+    <link rel="stylesheet" href="/css/admin.css" />
   </head>
   <body>
-    <h2>Admin Panel Absensi</h2>
+    <div class="header-container">
+      <h2>Admin Panel Absensi</h2>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
     <table id="absensiTable">
       <thead>
         <tr>
@@ -49,25 +35,30 @@
 
         data.forEach((a) => {
           const tr = document.createElement("tr");
+          const fotoSource = a.fotoUrl || a.fotoBase64 || "";
 
-          const fotoBase64 = a.foto ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...a.foto))}` : "";
+          const statusBadge = `<span class="status-badge ${a.status.toLowerCase()}">${a.status}</span>`;
 
           tr.innerHTML = `
-            <td>${a.id}</td>
-            <td>${a.userNama}</td>
-            <td>${fotoBase64 ? `<img src="${fotoBase64}" />` : "Tidak ada"}</td>
-            <td>${a.latitude.toFixed(6)}, ${a.longitude.toFixed(6)}</td>
-            <td>${new Date(a.timestamp).toLocaleString()}</td>
-            <td>${a.status}</td>
-            <td>
-                ${
-                  a.status === "pending"
-                    ? `<button onclick="updateStatus(${a.id}, 'approve')">Approve</button>
-                                            <button onclick="updateStatus(${a.id}, 'reject')">Reject</button>`
-                    : ""
-                }
-            </td>
-        `;
+                    <td data-label="ID">${a.id}</td>
+                    <td data-label="User">${a.userNama}</td>
+                    <td data-label="Foto">${fotoSource ? `<img src="${fotoSource}" alt="Foto Absensi" />` : "Tidak ada"}</td>
+                    <td data-label="Lokasi">
+                        <a href="https://maps.google.com/maps?q=${a.latitude},${a.longitude}" target="_blank">
+                            ${a.latitude.toFixed(6)}, ${a.longitude.toFixed(6)}
+                        </a>
+                    </td>
+                    <td data-label="Waktu">${new Date(a.timestamp).toLocaleString()}</td>
+                    <td data-label="Status">${statusBadge}</td>
+                    <td data-label="Aksi">
+                        ${
+                          a.status.toLowerCase() === "pending"
+                            ? `<button onclick="updateStatus(${a.id}, 'approve')">Approve</button>
+                               <button onclick="updateStatus(${a.id}, 'reject')">Reject</button>`
+                            : ""
+                        }
+                    </td>
+                `;
           tbody.appendChild(tr);
         });
       }
@@ -75,12 +66,19 @@
       async function updateStatus(id, action) {
         const res = await fetch(`/api/absensi/${id}/${action}`, { method: "POST" });
         if (res.ok) {
-          alert(action === "approve" ? "Disetujui" : "Ditolak");
+          alert(action === "approve" ? "Status Disetujui" : "Status Ditolak");
           loadAbsensi();
         } else {
-          alert("Gagal mengubah status");
+          alert("Gagal mengubah status. Mungkin status sudah diubah.");
         }
       }
+
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        sessionStorage.removeItem("userId");
+        sessionStorage.removeItem("userNama");
+        sessionStorage.removeItem("userRole");
+        window.location.href = "/";
+      });
 
       loadAbsensi();
     </script>

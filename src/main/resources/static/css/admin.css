@@ -1,0 +1,194 @@
+/* admin.css - versi modern SaaS */
+
+/* --- Reset & Base --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f5f7fa;
+  color: #2c3e50;
+  padding: 20px;
+}
+
+/* --- Header --- */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header-container h2 {
+  font-size: 26px;
+  color: #34495e;
+}
+
+#logoutBtn {
+  padding: 8px 18px;
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#logoutBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Tabel --- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+thead {
+  background-color: #3498db;
+  color: #fff;
+}
+
+thead th {
+  padding: 14px 20px;
+  text-align: left;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+tbody td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #ecf0f1;
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+tbody tr:hover {
+  background-color: #f0f4f8;
+}
+
+img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ecf0f1;
+  transition: transform 0.2s;
+}
+
+img:hover {
+  transform: scale(1.1);
+}
+
+/* --- Badge modern bulat kecil --- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Warna badge */
+.status-badge.pending {
+  background-color: #f39c12;
+}
+
+.status-badge.pending::before {
+  background-color: #e67e22;
+}
+
+.status-badge.approve {
+  background-color: #27ae60;
+}
+
+.status-badge.approve::before {
+  background-color: #2ecc71;
+}
+
+.status-badge.reject {
+  background-color: #e74c3c;
+}
+
+.status-badge.reject::before {
+  background-color: #c0392b;
+}
+
+/* --- Tombol Aksi --- */
+button {
+  padding: 7px 14px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+}
+
+button:nth-child(1) {
+  background-color: #27ae60; /* Approve */
+  color: #fff;
+}
+
+button:nth-child(2) {
+  background-color: #e74c3c; /* Reject */
+  color: #fff;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    display: table-row;
+  }
+
+  tbody td {
+    display: table-cell;
+    padding: 12px;
+  }
+
+  img {
+    width: 40px;
+    height: 40px;
+  }
+
+  button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
