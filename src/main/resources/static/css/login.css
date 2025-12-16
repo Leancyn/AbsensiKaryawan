@@ -1,92 +1,156 @@
-/* Warna */
+/* --- Root Variables --- */
 :root {
-  --primary-color: #007bff; /* Biru Primer */
-  --primary-hover: #0056b3; /* Biru Hover */
-  --background-light: #f4f7f6; /* Latar Belakang Cerah */
-  --card-background: #ffffff; /* Latar Belakang Form */
+  --sidebar-bg-start: #064e3b;
+  --sidebar-bg-end: #022c22;
+  --accent-color: #22c55e;
+
+  --primary-color: var(--accent-color);
+  --primary-hover: #16a34a;
+  --card-background: #ffffff;
   --shadow-color: rgba(0, 0, 0, 0.1);
-  --error-color: #dc3545; /* Merah Error */
+  --error-color: #dc3545;
+  --heading-color: #064e3b;
 }
 
-/* --- Global & Layout --- */
+/* --- Body & Layout --- */
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, var(--sidebar-bg-start), var(--sidebar-bg-end));
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
   margin: 0;
-  background-color: var(--background-light);
 }
 
-/* --- Form Container (Card) --- */
-#loginForm {
-  background: var(--card-background);
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px var(--shadow-color);
+.login-card {
+  display: flex;
+  max-width: 900px;
   width: 100%;
-  max-width: 350px;
-  text-align: center;
-  transition: transform 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px var(--shadow-color);
 }
 
-#loginForm:hover {
-  transform: translateY(-5px);
+/* --- Form Left --- */
+.login-left {
+  flex: 1;
+  padding: 50px 40px;
+  background-color: var(--card-background);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-/* --- Heading --- */
-h2 {
-  color: #343a40;
+.login-left h2 {
+  color: var(--heading-color);
   margin-bottom: 30px;
+  text-align: center;
   font-weight: 600;
 }
 
-/* --- Input Fields --- */
-input[type="text"],
-input[type="password"] {
-  width: calc(100% - 20px);
+.login-left input[type="text"],
+.login-left input[type="password"] {
+  width: 100%;
   padding: 12px 10px;
   margin-bottom: 15px;
   border: 1px solid #ced4da;
   border-radius: 6px;
-  box-sizing: border-box; /* Agar padding tidak menambah lebar */
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus {
+.login-left input:focus {
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.25);
   outline: none;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-/* --- Button --- */
 #loginBtn {
-  width: 100%;
-  padding: 12px;
-  margin-top: 20px;
   background-color: var(--primary-color);
-  color: white;
-  border: none;
+  color: #fff;
   border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-weight: 600;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 #loginBtn:hover {
   background-color: var(--primary-hover);
+  transform: translateY(-2px);
 }
 
-#loginBtn:active {
-  background-color: #004085;
-}
-
-/* --- Message / Error --- */
 #loginMsg {
   margin-top: 15px;
   font-size: 14px;
-  color: var(--error-color) !important;
+  color: var(--error-color);
   font-weight: 500;
+  text-align: center;
+}
+
+/* --- Banner Right --- */
+.login-right {
+  flex: 1;
+  background: linear-gradient(135deg, var(--sidebar-bg-start), var(--sidebar-bg-end));
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.banner-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-15px);
+  }
+  60% {
+    transform: translateY(-7px);
+  }
+}
+
+.banner-text {
+  font-size: 24px;
+  font-weight: 600;
+  height: 35px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid rgba(255, 255, 255, 0.75);
+  animation: typing 15s steps(30) infinite;
+  -webkit-animation: typing 15s steps(30) infinite;
+}
+
+@keyframes typing {
+  0%,
+  50%,
+  100% {
+    width: 0;
+  }
+  25%,
+  75% {
+    width: 75%;
+  }
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .login-card {
+    flex-direction: column;
+  }
+  .login-right {
+    display: flex;
+    padding: 40px 20px;
+  }
 }

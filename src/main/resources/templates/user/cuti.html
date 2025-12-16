@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout/user-layout :: layout(
+        title='Cuti',
+        menu='cuti',
+        content=~{::content}
+      )"
+>
+  <th:block th:fragment="content">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h4 class="page-title">Pengajuan Cuti</h4>
+      <p class="text-muted small mb-0">Isi form berikut untuk mengajukan cuti</p>
+    </div>
+
+    <!-- FORM CUTI -->
+    <div class="card shadow-sm mt-3" style="max-width: 600px">
+      <div class="card-body">
+        <form id="cutiForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Tanggal Mulai</label>
+              <input type="date" class="form-control" id="tanggalMulai" required />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Tanggal Selesai</label>
+              <input type="date" class="form-control" id="tanggalSelesai" required />
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small text-muted">Alasan Cuti</label>
+              <textarea class="form-control" id="alasan" rows="4" placeholder="Contoh: Keperluan keluarga" required></textarea>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end mt-3">
+            <button class="btn btn-primary btn-sm px-4" type="submit">Ajukan Cuti</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- RIWAYAT CUTI -->
+    <div class="card shadow-sm mt-4" style="max-width: 800px">
+      <div class="card-body">
+        <h6 class="card-title mb-3">Riwayat Pengajuan Cuti</h6>
+
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Periode</th>
+                <th>Alasan</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="riwayatCutiBody">
+              <tr>
+                <td colspan="3" class="text-center text-muted">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+      // ===== AMBIL USER ID DARI SESSION =====
+      const USER_ID = "[[${session.userId}]]";
+
+      if (!USER_ID || USER_ID === "null") {
+        alert("Session user tidak ditemukan, silakan login ulang");
+      }
+
+      // ===== SUBMIT CUTI =====
+      document.getElementById("cutiForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const payload = {
+          userId: USER_ID,
+          tanggalMulai: document.getElementById("tanggalMulai").value,
+          tanggalSelesai: document.getElementById("tanggalSelesai").value,
+          alasan: document.getElementById("alasan").value,
+        };
+
+        try {
+          const res = await fetch("/api/cuti/ajukan", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            throw new Error(await res.text());
+          }
+
+          alert("Pengajuan cuti berhasil dikirim");
+          document.getElementById("cutiForm").reset();
+          loadRiwayatCuti();
+        } catch (err) {
+          alert("Gagal mengajukan cuti: " + err.message);
+        }
+      });
+
+      // ===== LOAD RIWAYAT CUTI USER =====
+      async function loadRiwayatCuti() {
+        const body = document.getElementById("riwayatCutiBody");
+        body.innerHTML = "";
+
+        try {
+          const res = await fetch(`/api/cuti/user/${USER_ID}`);
+          const data = await res.json();
+
+          if (data.length === 0) {
+            body.innerHTML = `
+              <tr>
+                <td colspan="3" class="text-center text-muted">
+                  Belum ada pengajuan cuti
+                </td>
+              </tr>
+            `;
+            return;
+          }
+
+          data.forEach((c) => {
+            let badge = "bg-secondary";
+            if (c.status === "pending") badge = "bg-warning";
+            if (c.status === "approved") badge = "bg-success";
+            if (c.status === "rejected") badge = "bg-danger";
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${c.tanggalMulai} → ${c.tanggalSelesai}</td>
+              <td>${c.alasan}</td>
+              <td>
+                <span class="badge ${badge}">
+                  ${c.status.toUpperCase()}
+                </span>
+              </td>
+            `;
+            body.appendChild(tr);
+          });
+        } catch (e) {
+          body.innerHTML = `
+            <tr>
+              <td colspan="3" class="text-danger text-center">
+                Gagal memuat riwayat cuti
+              </td>
+            </tr>
+          `;
+        }
+      }
+
+      loadRiwayatCuti();
+    </script>
+  </th:block>
+</html>

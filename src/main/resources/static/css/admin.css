@@ -1,20 +1,37 @@
-/* admin.css - versi modern SaaS */
+/* =====================================================
+   THEME VARIABLES
+===================================================== */
+:root {
+  --sidebar-bg-start: #0f766e;
+  --sidebar-bg-end: #134e4a;
+  --accent-color: #14b8a6;
 
-/* --- Reset & Base --- */
+  --text-light: #e5e7eb;
+  --text-muted: #9ca3af;
+
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 80px;
+}
+
+/* =====================================================
+   BASE
+===================================================== */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f5f7fa;
   color: #2c3e50;
-  padding: 20px;
+  transition: margin 0.35s ease;
 }
 
-/* --- Header --- */
+/* =====================================================
+   HEADER
+===================================================== */
 .header-container {
   display: flex;
   justify-content: space-between;
@@ -43,7 +60,81 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* --- Tabel --- */
+/* =====================================================
+   SIDEBAR DESKTOP
+===================================================== */
+.user-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: linear-gradient(180deg, var(--sidebar-bg-start), var(--sidebar-bg-end));
+  color: var(--text-light);
+  padding: 1.75rem 1.2rem;
+  z-index: 1030;
+  box-shadow: 4px 0 18px rgba(0, 0, 0, 0.25);
+  transition: width 0.35s ease;
+}
+
+.user-sidebar h5 {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1.5px;
+  margin-bottom: 2rem;
+  color: #ffffff;
+  transition: opacity 0.3s ease;
+}
+
+.user-sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-light);
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  white-space: nowrap;
+}
+
+.user-sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.user-sidebar .nav-link.active {
+  background-color: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 6px 14px rgba(20, 184, 166, 0.45);
+}
+
+/* =====================================================
+   MAIN CONTENT
+===================================================== */
+.user-main {
+  padding: 2rem;
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  transition: margin 0.35s ease;
+}
+
+@media (max-width: 768px) {
+  .user-main {
+    margin-left: 0;
+    padding-top: 4.5rem;
+  }
+  .user-sidebar {
+    display: none !important;
+  }
+}
+
+/* =====================================================
+   TABLES
+===================================================== */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -89,7 +180,9 @@ img:hover {
   transform: scale(1.1);
 }
 
-/* --- Badge modern bulat kecil --- */
+/* =====================================================
+   BADGE STATUS
+===================================================== */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -109,11 +202,9 @@ img:hover {
   display: inline-block;
 }
 
-/* Warna badge */
 .status-badge.pending {
   background-color: #f39c12;
 }
-
 .status-badge.pending::before {
   background-color: #e67e22;
 }
@@ -121,7 +212,6 @@ img:hover {
 .status-badge.approve {
   background-color: #27ae60;
 }
-
 .status-badge.approve::before {
   background-color: #2ecc71;
 }
@@ -129,12 +219,13 @@ img:hover {
 .status-badge.reject {
   background-color: #e74c3c;
 }
-
 .status-badge.reject::before {
   background-color: #c0392b;
 }
 
-/* --- Tombol Aksi --- */
+/* =====================================================
+   BUTTONS
+===================================================== */
 button {
   padding: 7px 14px;
   margin-right: 5px;
@@ -161,34 +252,70 @@ button:hover {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-/* --- Responsive --- */
-@media (max-width: 768px) {
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
+/* =====================================================
+   HAMBURGER BUTTON & OFFCANVAS MOBILE
+===================================================== */
+.hamburger-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1050;
+  border-radius: 12px;
+  padding: 0.45rem 0.7rem;
+  font-size: 1.2rem;
+  background-color: var(--accent-color);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
-  thead {
-    display: none;
-  }
+.hamburger-btn:hover {
+  background-color: #0f766e;
+}
 
-  tbody tr {
-    display: table-row;
-  }
+.offcanvas {
+  background: linear-gradient(180deg, var(--sidebar-bg-start), var(--sidebar-bg-end));
+  color: var(--text-light);
+}
 
-  tbody td {
-    display: table-cell;
-    padding: 12px;
-  }
+.offcanvas-end {
+  right: auto !important;
+  left: 0 !important;
+  transform: translateX(-100%);
+}
 
-  img {
-    width: 40px;
-    height: 40px;
-  }
+.offcanvas-end.show {
+  transform: translateX(0);
+}
 
-  button {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
+.offcanvas-header {
+  padding: 1.2rem;
+}
+
+.offcanvas-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+}
+
+.offcanvas .nav-link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-light);
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+}
+
+.offcanvas .nav-link:hover,
+.offcanvas .nav-link.active {
+  background-color: var(--accent-color);
+  color: #ffffff;
+}
+
+.offcanvas .btn-outline-light {
+  border-radius: 999px;
+  font-size: 0.85rem;
 }

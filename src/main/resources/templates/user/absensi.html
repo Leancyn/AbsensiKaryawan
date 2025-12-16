@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div
+      th:replace="layout/user-layout :: layout(
+        title='Absensi',
+        menu='absensi',
+        content=~{::content}
+      )"
+    >
+      <th:block th:fragment="content">
+        <div class="page-header">
+          <h4 class="page-title">Absensi</h4>
+        </div>
+
+        <!-- STATUS HARI INI -->
+        <div class="alert alert-info mt-3" id="statusBox">Mengecek status absensi hari ini...</div>
+
+        <!-- Kamera / Absen -->
+        <div class="card shadow-sm action-card mt-3">
+          <div class="card-body">
+            <video id="video" class="absen-video d-none w-100 rounded" autoplay playsinline></video>
+
+            <div class="mt-3 d-flex gap-2 flex-wrap">
+              <button id="cameraBtn" class="btn btn-primary btn-sm">Nyalakan Kamera</button>
+              <button id="absenBtn" class="btn btn-success btn-sm" disabled>Absen</button>
+            </div>
+
+            <small class="text-muted d-block mt-2">Foto dan lokasi diambil secara real-time </small>
+          </div>
+        </div>
+
+        <!-- Riwayat Absensi -->
+        <div class="card shadow-sm history-card mt-4">
+          <div class="card-body">
+            <h6 class="card-title mb-3">Riwayat Absensi</h6>
+
+            <div class="table-responsive history-table">
+              <table class="table table-sm mb-0 align-middle">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="historyBody">
+                  <tr>
+                    <td colspan="2" class="text-center text-muted">Memuat riwayat...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </th:block>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const video = document.getElementById("video");
+        const cameraBtn = document.getElementById("cameraBtn");
+        const absenBtn = document.getElementById("absenBtn");
+        const historyBody = document.getElementById("historyBody");
+        const statusBox = document.getElementById("statusBox");
+
+        let latitude = null;
+        let longitude = null;
+        let stream = null;
+        let sudahAbsenHariIni = false;
+
+        /* =========================
+           CEK STATUS HARI INI
+        ========================== */
+        async function cekStatusHariIni() {
+          const res = await fetch("/api/absensi/status-hari-ini");
+          const status = await res.text();
+
+          if (status === "belum") {
+            statusBox.className = "alert alert-warning";
+            statusBox.innerText = "Anda belum melakukan absensi hari ini";
+            sudahAbsenHariIni = false;
+          } else if (status === "pending") {
+            statusBox.className = "alert alert-secondary";
+            statusBox.innerText = "Absensi hari ini menunggu approval admin";
+            sudahAbsenHariIni = true;
+          } else {
+            statusBox.className = "alert alert-success";
+            statusBox.innerText = "Anda sudah absen hari ini";
+            sudahAbsenHariIni = true;
+          }
+
+          cameraBtn.disabled = sudahAbsenHariIni;
+          absenBtn.disabled = true;
+        }
+
+        /* =========================
+           LOAD RIWAYAT
+        ========================== */
+        async function loadHistory() {
+          const res = await fetch("/api/absensi/riwayat");
+          const data = await res.json();
+
+          historyBody.innerHTML = "";
+
+          if (data.length === 0) {
+            historyBody.innerHTML = `
+              <tr>
+                <td colspan="2" class="text-center text-muted">
+                  Belum ada data absensi
+                </td>
+              </tr>
+            `;
+            return;
+          }
+
+          data.forEach((a) => {
+            let badge = a.status === "approved" ? "success" : a.status === "rejected" ? "danger" : "warning";
+
+            let label = a.status === "approved" ? "Hadir" : a.status === "rejected" ? "Ditolak" : "Menunggu Approval";
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${new Date(a.timestamp).toLocaleString()}</td>
+              <td>
+                <span class="badge bg-${badge}">
+                  ${label}
+                </span>
+              </td>
+            `;
+            historyBody.appendChild(tr);
+          });
+        }
+
+        /* =========================
+           GPS
+        ========================== */
+        function getLocation() {
+          return new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                latitude = pos.coords.latitude;
+                longitude = pos.coords.longitude;
+                resolve();
+              },
+              () => reject("Izin lokasi ditolak"),
+              { enableHighAccuracy: true }
+            );
+          });
+        }
+
+        /* =========================
+           CAMERA
+        ========================== */
+        cameraBtn.onclick = async () => {
+          try {
+            cameraBtn.disabled = true;
+
+            await getLocation();
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+            video.srcObject = stream;
+            video.classList.remove("d-none");
+            absenBtn.disabled = false;
+          } catch (e) {
+            alert(e);
+            cameraBtn.disabled = false;
+          }
+        };
+
+        /* =========================
+           ABSEN
+        ========================== */
+        absenBtn.onclick = async () => {
+          absenBtn.disabled = true;
+
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          canvas.getContext("2d").drawImage(video, 0, 0);
+
+          const blob = await new Promise((r) => canvas.toBlob(r, "image/jpeg"));
+
+          const form = new FormData();
+          form.append("latitude", latitude);
+          form.append("longitude", longitude);
+          form.append("foto", blob, "absen.jpg");
+
+          try {
+            const res = await fetch("/api/absensi/checkin", {
+              method: "POST",
+              body: form,
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+
+            alert("Absensi berhasil dikirim");
+
+            stream.getTracks().forEach((t) => t.stop());
+            video.classList.add("d-none");
+
+            await cekStatusHariIni();
+            await loadHistory();
+          } catch (e) {
+            alert("Gagal absen: " + e.message);
+            absenBtn.disabled = false;
+            cameraBtn.disabled = false;
+          }
+        };
+
+        async function cekStatusHariIni() {
+          const res = await fetch("/api/absensi/status-hari-ini");
+          const status = await res.text();
+
+          if (status === "belum") {
+            statusBox.className = "alert alert-warning";
+            statusBox.innerText = "Anda belum melakukan absensi hari ini";
+            sudahAbsenHariIni = false;
+          } else if (status === "pending") {
+            statusBox.className = "alert alert-secondary";
+            statusBox.innerText = "Absensi hari ini menunggu approval admin";
+            sudahAbsenHariIni = true;
+          } else if (status === "approved") {
+            statusBox.className = "alert alert-success";
+            statusBox.innerText = "Anda sudah absen hari ini";
+            sudahAbsenHariIni = true;
+          } else if (status === "rejected") {
+            statusBox.className = "alert alert-danger";
+            statusBox.innerText = "Absensi hari ini ditolak, silakan absen ulang";
+            sudahAbsenHariIni = false; // penting, supaya user bisa absen ulang
+          } else {
+            statusBox.className = "alert alert-secondary";
+            statusBox.innerText = "Status tidak diketahui";
+            sudahAbsenHariIni = false;
+          }
+
+          // aktif/nonaktifkan tombol kamera/absen sesuai status
+          cameraBtn.disabled = sudahAbsenHariIni;
+          absenBtn.disabled = !stream || sudahAbsenHariIni;
+        }
+
+        /* INIT */
+        cekStatusHariIni();
+        loadHistory();
+      });
+    </script>
+  </body>
+</html>

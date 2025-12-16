@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="layout(title, menu, content)">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"/>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/user-layout.css}"/>
+</head>
+
+<body class="bg-light">
+
+<!-- ================= SIDEBAR DESKTOP (LEFT) ================= -->
+<aside class="user-sidebar d-none d-md-block">
+    <h5>ABSENSI</h5>
+
+    <ul class="nav nav-pills flex-column gap-2">
+        <li>
+            <a class="nav-link"
+               th:classappend="${menu=='dashboard'} ? ' active'"
+               th:href="@{/user/dashboard}">
+                Dashboard
+            </a>
+        </li>
+        <li>
+            <a class="nav-link"
+               th:classappend="${menu=='absensi'} ? ' active'"
+               th:href="@{/user/absensi}">
+                Absensi
+            </a>
+        </li>
+        <li>
+            <a class="nav-link"
+               th:classappend="${menu=='cuti'} ? ' active'"
+               th:href="@{/user/cuti}">
+                Cuti
+            </a>
+        </li>
+    </ul>
+
+    <button class="btn btn-outline-light btn-sm mt-4 w-100"
+            onclick="logout()">
+        Logout
+    </button>
+</aside>
+
+<!-- ================= HAMBURGER MOBILE ================= -->
+<button class="hamburger-btn d-md-none btn btn-dark"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#sidebarOffcanvas"
+        aria-controls="sidebarOffcanvas">
+    ☰
+</button>
+
+<!-- ================= OFFCANVAS MOBILE (LEFT) ================= -->
+<div class="offcanvas offcanvas-start"
+     tabindex="-1"
+     id="sidebarOffcanvas"
+     aria-labelledby="sidebarLabel">
+
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarLabel">ABSENSI</h5>
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close">
+        </button>
+    </div>
+
+    <div class="offcanvas-body p-0">
+        <ul class="nav nav-pills flex-column gap-2 px-3">
+            <li>
+                <a class="nav-link"
+                   th:classappend="${menu=='dashboard'} ? ' active'"
+                   th:href="@{/user/dashboard}">
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a class="nav-link"
+                   th:classappend="${menu=='absensi'} ? ' active'"
+                   th:href="@{/user/absensi}">
+                    Absensi
+                </a>
+            </li>
+            <li>
+                <a class="nav-link"
+                   th:classappend="${menu=='cuti'} ? ' active'"
+                   th:href="@{/user/cuti}">
+                    Cuti
+                </a>
+            </li>
+            <li>
+                <a class="nav-link"
+                   th:classappend="${menu=='profile'} ? ' active'"
+                   th:href="@{/user/profile}">
+                    Profile
+                </a>
+            </li>
+        </ul>
+
+        <div class="px-3 mt-4">
+            <button class="btn btn-outline-light btn-sm w-100"
+                    onclick="logout()">
+                Logout
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="user-main">
+    <div th:replace="${content}"></div>
+</main>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function logout() {
+        fetch("/logout").finally(() => {
+            sessionStorage.clear();
+            location.href = "/";
+        });
+    }
+</script>
+
+</body>
+</th:block>
+</html>

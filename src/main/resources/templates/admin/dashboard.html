@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout/admin-layout :: layout(
+    title='Dashboard Admin',
+    menu='dashboard',
+    content=~{::content}
+  )"
+>
+  <th:block th:fragment="content">
+    <h4>Dashboard Admin</h4>
+
+    <div class="alert alert-info mt-3">
+      Selamat datang,
+      <strong th:text="${userNama}">Admin</strong>
+    </div>
+  </th:block>
+</html>

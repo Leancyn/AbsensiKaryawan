@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout/user-layout :: layout(
+        title='Dashboard',
+        menu='dashboard',
+        content=~{::content}
+      )"
+>
+  <th:block th:fragment="content">
+    <div class="page-header">
+      <h4 class="page-title">Dashboard</h4>
+    </div>
+
+    <div class="alert alert-info alert-welcome mt-3">
+      Selamat datang,
+      <strong th:text="${userNama}">User</strong>
+    </div>
+
+    <div class="card status-card shadow-sm mt-3">
+      <div class="card-body">
+        <p class="status-label">Status absensi hari ini</p>
+        <span id="statusBadge" class="badge bg-secondary status-badge"> Memuat... </span>
+      </div>
+    </div>
+
+    <script>
+      fetch("/api/absensi/status-hari-ini")
+        .then((r) => r.text())
+        .then((status) => {
+          const b = document.getElementById("statusBadge");
+
+          if (status === "belum") {
+            b.className = "badge bg-warning status-badge";
+            b.innerText = "Belum Absen";
+          } else if (status === "pending") {
+            b.className = "badge bg-secondary status-badge";
+            b.innerText = "Menunggu Approval";
+          } else if (status === "approved") {
+            b.className = "badge bg-success status-badge";
+            b.innerText = "Hadir";
+          } else if (status === "rejected") {
+            b.className = "badge bg-danger status-badge";
+            b.innerText = "Ditolak";
+          } else {
+            b.className = "badge bg-secondary status-badge";
+            b.innerText = status; // fallback
+          }
+        });
+    </script>
+  </th:block>
+</html>
