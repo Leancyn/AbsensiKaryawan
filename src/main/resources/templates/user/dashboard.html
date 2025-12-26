@@ -17,6 +17,7 @@
       <strong th:text="${userNama}">User</strong>
     </div>
 
+    <!-- STATUS ABSENSI -->
     <div class="card status-card shadow-sm mt-3">
       <div class="card-body">
         <p class="status-label">Status absensi hari ini</p>
@@ -24,29 +25,117 @@
       </div>
     </div>
 
-    <script>
-      fetch("/api/absensi/status-hari-ini")
-        .then((r) => r.text())
-        .then((status) => {
-          const b = document.getElementById("statusBadge");
+    <!-- CHART STATISTIK ABSENSI -->
+    <div class="card-body mt-4">
+      <div class="absensi-grid">
+        <!-- KIRI: CHART -->
+        <div class="chart-wrapper">
+          <canvas id="absensiChart"></canvas>
+        </div>
 
-          if (status === "belum") {
-            b.className = "badge bg-warning status-badge";
-            b.innerText = "Belum Absen";
-          } else if (status === "pending") {
-            b.className = "badge bg-secondary status-badge";
-            b.innerText = "Menunggu Approval";
-          } else if (status === "approved") {
-            b.className = "badge bg-success status-badge";
-            b.innerText = "Hadir";
-          } else if (status === "rejected") {
-            b.className = "badge bg-danger status-badge";
-            b.innerText = "Ditolak";
-          } else {
-            b.className = "badge bg-secondary status-badge";
-            b.innerText = status; // fallback
-          }
-        });
+        <!-- KANAN: RINGKASAN -->
+        <div class="stat-summary">
+          <h6 class="mb-3">Ringkasan</h6>
+
+          <div class="d-flex flex-column justify-content-center gap-3">
+            <div class="stat-item">
+              <span class="label">Hadir</span>
+              <span id="hadirCount" class="value hadir">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="label">Pending</span>
+              <span id="pendingCount" class="value pending">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="label">Ditolak</span>
+              <span id="ditolakCount" class="value ditolak">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART.JS (PRODUCTION SAFE) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        /* ======================
+           STATUS ABSENSI HARI INI
+        ====================== */
+        fetch("/api/absensi/status-hari-ini")
+          .then((r) => r.text())
+          .then((status) => {
+            const b = document.getElementById("statusBadge");
+
+            if (status === "belum") {
+              b.className = "badge bg-warning status-badge";
+              b.innerText = "Belum Absen";
+            } else if (status === "pending") {
+              b.className = "badge bg-secondary status-badge";
+              b.innerText = "Menunggu Approval";
+            } else if (status === "approved") {
+              b.className = "badge bg-success status-badge";
+              b.innerText = "Hadir";
+            } else if (status === "rejected") {
+              b.className = "badge bg-danger status-badge";
+              b.innerText = "Ditolak";
+            } else {
+              b.className = "badge bg-secondary status-badge";
+              b.innerText = status;
+            }
+          });
+
+        /* ======================
+           CHART STATISTIK ABSENSI
+        ====================== */
+        fetch("/api/absensi/stat-status")
+          .then((res) => res.json())
+          .then((data) => {
+
+            // reset nilai
+            let hadir = 0;
+            let pending = 0;
+            let ditolak = 0;
+
+            // data = [ ["approved", 1], ["pending", 2], ... ]
+            data.forEach((row) => {
+              const status = row[0];
+              const total = Number(row[1]);
+
+              if (status === "approved") hadir = total;
+              if (status === "pending") pending = total;
+              if (status === "rejected") ditolak = total;
+            });
+
+            // === RINGKASAN ===
+            document.getElementById("hadirCount").innerText = hadir;
+            document.getElementById("pendingCount").innerText = pending;
+            document.getElementById("ditolakCount").innerText = ditolak;
+
+            // === CHART ===
+            new Chart(document.getElementById("absensiChart"), {
+              type: "doughnut",
+              data: {
+                labels: ["Hadir", "Pending", "Ditolak"],
+                datasets: [
+                  {
+                    data: [hadir, pending, ditolak],
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: "bottom",
+                  },
+                },
+              },
+            });
+          });
+      });
     </script>
   </th:block>
 </html>

@@ -19,6 +19,7 @@ public class Absensi {
 
     private String userId;
     private String userNama;
+    private String nip;
     private double latitude;
     private double longitude;
     private LocalDateTime timestamp;
@@ -42,6 +43,14 @@ public class Absensi {
 
     // Getter & Setter
     public Long getId() { return id; }
+
+        public String getNip() {
+        return nip;
+    }
+
+    public void setNip(String nip) {
+        this.nip = nip;
+    }
 
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }

@@ -30,6 +30,13 @@ public class AbsensiController {
     @Autowired
     private AbsensiRepository absensiRepository;   // radius absensi
 
+    @GetMapping("/stat-status")
+    public List<Object[]> statStatus(HttpSession session) {
+        String nip = String.valueOf(session.getAttribute("nip"));
+        return absensiRepository.countByStatusByNip(nip);
+    }
+
+
     /* =========================
        UTIL WAKTU HARI INI
     ========================== */
@@ -68,6 +75,7 @@ public class AbsensiController {
                 foto.getBytes()
         );
 
+        absensi.setNip((String) session.getAttribute("nip")); 
         absensi.setStatus("pending");
         absensiRepository.save(absensi);
 

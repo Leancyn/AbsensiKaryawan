@@ -1,6 +1,5 @@
 package com.absensi.app.controller;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,6 +8,8 @@ import com.absensi.app.dto.LoginRequest;
 import com.absensi.app.dto.LoginResponse;
 import com.absensi.app.model.Karyawan;
 import com.absensi.app.repository.KaryawanRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 public class AuthController {
@@ -33,6 +34,8 @@ public class AuthController {
         session.setAttribute("userId", k.getId());
         session.setAttribute("userRole", k.getRole());
         session.setAttribute("userNama", k.getNama());
+        session.setAttribute("nip", k.getNip());
+
 
         return new LoginResponse(true, "Login berhasil", k.getRole(), k.getId(), k.getNama());
     }
